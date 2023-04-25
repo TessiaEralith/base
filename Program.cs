@@ -1,8 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Net;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Server_Client;
 
 //чтение файла
 static List<User> bd()
@@ -51,44 +50,29 @@ static void Write(List<User> list)
     }
 }
 
-static bool Reg( string log)
+
+
+TcpListener server = new TcpListener(IPAddress.Any, 7000);
+server.Start();
+
+
+string s = "Привет!";
+while (true)
 {
-    List<User> list = bd();
-    foreach (var us in list)
-    {
-        if (us.login == log) return false;
-    }
-    return true;
- }
-//мб эти две функции позже в вынесут в другую библиотеку
-static string sing(string log)
-{
-    List<User> list = bd();
-    foreach (var us in list)
-    {
-        if (us.login == log) return us.password;
-    }
-    return "неверный логин";
+    TcpClient client = server.AcceptTcpClient();
+    NetworkStream stream = client.GetStream();
+
+    ReceivingAndSending.Sending(stream, s);
+
+    
+    string request = ReceivingAndSending.Receiving(stream);
+    Console.WriteLine("Got req: " + request);
+
+    
 }
 
-//IPHostEntry ipHost = Dns.GetHostEntry("localhost");
-//IPAddress ipAddr = ipHost.AddressList[1];
-//IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 8080);
+server.Stop();
 
-//Socket socket = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-//socket.Connect(ipEndPoint);
-
-
-//String msg;
-//while (true)
-//{
-//    msg = Console.ReadLine();
-//    byte[] data = Encoding.UTF8.GetBytes(msg);
-//    socket.Send(data);
-//}
-
-//socket.Close();
 public class User
 {
     public string login = "";
